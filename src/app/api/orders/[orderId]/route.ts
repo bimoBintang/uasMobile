@@ -1,12 +1,13 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: { orderId: string } }
 ) {
   try {
     const order = await prisma.order.findUnique({
-      where: { id: params.id },
+      where: { id: params.orderId },
       include: {
         user: {
           select: {
@@ -37,15 +38,15 @@ export async function GET(
 }
 
 export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: Request | NextRequest,
+  { params }: { params: { orderId: string } }
 ) {
   try {
     const body = await request.json()
     const { status, alamat, ongkir } = body
 
     const order = await prisma.order.update({
-      where: { id: params.id },
+      where: { id: params.orderId },
       data: {
         status,
         alamat,
@@ -77,17 +78,17 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: Request | NextRequest,
+  { params }: { params: { orderId: string } }
 ) {
   try {
     // Delete detail orders first due to foreign key constraint
     await prisma.detailOrder.deleteMany({
-      where: { orderId: params.id }
+      where: { orderId: params.orderId }
     })
 
     await prisma.order.delete({
-      where: { id: params.id }
+      where: { id: params.orderId }
     })
 
     return NextResponse.json({ message: 'Order deleted successfully' })
