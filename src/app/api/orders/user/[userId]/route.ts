@@ -2,11 +2,15 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
+
+    const resolveUser = await params;
+    const id = resolveUser.userId;
+    
     const orders = await prisma.order.findMany({
-      where: { userId: params.userId },
+      where: { userId: id },
       include: {
         user: {
           select: {

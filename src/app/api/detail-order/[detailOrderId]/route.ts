@@ -2,11 +2,14 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ detailOrderId: string }>}
 ) {
   try {
+    const resolveOrder = await params;
+    const id = String(resolveOrder.detailOrderId)
+
     const detailOrder = await prisma.detailOrder.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         order: {
           include: {
@@ -41,11 +44,14 @@ export async function GET(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ detailOrderId: string }> }
 ) {
   try {
+    const resolveOrder = await params;
+    const id = String(resolveOrder.detailOrderId)
+
     await prisma.detailOrder.delete({
-      where: { id: params.id }
+      where: { id: id }
     })
 
     return NextResponse.json({ message: 'Detail order deleted successfully' })

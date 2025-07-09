@@ -6,6 +6,17 @@ export function middleware(request: NextRequest) {
   // Daftar protected routes
   const protectedRoutes = ['/api/orders', '/api/products', '/dashboard']
   const adminRoutes = ['/api/admin', '/admin']
+  
+  if (request.nextUrl.pathname === '/logout') {
+    const response = NextResponse.redirect(new URL('/login', request.url))
+    
+    // Clear cookies in middleware
+    response.cookies.set('token', '', { expires: new Date(0) })
+    response.cookies.set('refreshToken', '', { expires: new Date(0) })
+    response.cookies.set('session', '', { expires: new Date(0) })
+    
+    return response;
+  }
 
   const isProtectedRoute = protectedRoutes.some(route => 
     request.nextUrl.pathname.startsWith(route)
@@ -55,5 +66,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/api/:path*', '/dashboard/:path*', '/admin/:path*']
+  matcher: ['/api/:path*', '/dashboard/:path*', '/admin/:path*', '/logout', '/api/logout/:path*']
 }

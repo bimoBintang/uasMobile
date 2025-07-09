@@ -2,11 +2,14 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ produkId: string }> }
 ) {
   try {
+    const resolveProduk = await params;
+    const id = resolveProduk.produkId;
+
     const product = await prisma.produk.findUnique({
-      where: { id: params.id }
+      where: { id: id }
     })
 
     if (!product) {
@@ -21,14 +24,17 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ produkId: string }> }
 ) {
   try {
+    const resolveProduk = await params;
+    const id = resolveProduk.produkId;
+
     const body = await request.json()
     const { nama, quantity,image, price, jenis, satuan, deskripsi } = body
 
     const product = await prisma.produk.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         nama,
         quantity: quantity ? parseInt(quantity) : undefined,
@@ -47,11 +53,14 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ produkId: string }> }
 ) {
   try {
+    const resolveProduk = await params;
+    const id = resolveProduk.produkId;
+
     await prisma.produk.delete({
-      where: { id: params.id }
+      where: { id: id }
     })
 
     return NextResponse.json({ message: 'Product deleted successfully' })

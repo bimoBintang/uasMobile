@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export async function GET(request: Request) {
+export async function GET(request: Request | NextRequest) {
   try {
     // Ambil user info dari headers yang di-set oleh middleware
     const userId = request.headers.get('x-user-id')
@@ -51,7 +51,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: Request | NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')
     
