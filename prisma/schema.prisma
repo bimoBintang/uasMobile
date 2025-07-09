@@ -18,13 +18,15 @@ datasource db {
 model User {
   id      String  @id @default(cuid())
   username  String  @db.VarChar(50)
-  email     String  @db.VarChar(100) @unique
+  email     String  @db.VarChar(100)
   password  String  @db.VarChar()
-  phone     String  @unique
+  phone     String  
   role      Role    @default(CUSTOMER)
 
 
   order      Order[]
+
+  @@unique([email, phone])
 }
 
 
@@ -33,6 +35,7 @@ model Produk {
   nama      String  @db.VarChar(50)
   quantity  Int
   price     Int
+  image     String?
   jenis     String
   satuan    Satuan?  @default(PCS)
   deskripsi String?

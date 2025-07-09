@@ -1,50 +1,42 @@
-import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
-
+import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 
 export async function GET() {
-    try {
-        const produk = await prisma.produk.findMany();
-
-        if(!produk) {
-            return NextResponse.json({message: "No produk found"}, {status: 404});
-        };
-
-        return NextResponse.json({
-            produk
-        });
-    } catch (error) {
-        return NextResponse.json({message: "Something went wrong", error}, {status: 500});
-    }
+  try {
+    const products = await prisma.produk.findMany({
+      orderBy: {
+        nama: 'asc'
+      }
+    })
+    return NextResponse.json(products)
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 })
+  }
 }
 
+export async function POST(request: Request) {
+  try {
+    const body = await request.json()
+    const { nama, quantity, image, price, jenis, satuan, deskripsi } = body
 
-export async function POST(req: Request) {
-    try {
-        const { nama, price, quantity, jenis, satuan, deskripsi} = await req.json();
-        const createProduk = await prisma.produk.create({
-            data: {
-                nama: nama,
-                price: price,
-                quantity: quantity,
-                jenis: jenis,
-                satuan: satuan,
-                deskripsi: deskripsi
-            }
-        })
-
-
-        return NextResponse.json({
-            produk: {
-                nama: createProduk.nama,
-                quantity: createProduk.quantity,
-                price: createProduk.price,
-                jenis: createProduk.jenis,
-                satuan: createProduk.satuan,
-                deskripsi: createProduk.deskripsi
-            }
-        })
-    } catch (error) {
-        return NextResponse.json({ message: "Something went wrong", error }, { status: 500 });
+    if (!nama || !quantity || !price || !jenis) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
+
+    const product = await prisma.produk.create({
+      data: {
+        nama,
+        quantity: parseInt(quantity),
+        price: parseInt(price),
+        jenis,
+        image,
+        satuan: satuan || 'PCS',
+        deskripsi
+      }
+    })
+
+    return NextResponse.json(product, { status: 201 })
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to create product' }, { status: 500 })
+  }
 }
