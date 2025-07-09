@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id      String  @id @default(cuid())
+  username  String  @db.VarChar(50)
+  email     String  @db.VarChar(100) @unique
+  password  String  @db.VarChar()
+  phone     String  @unique
+  role      Role    @default(CUSTOMER)
+
+
+  order      Order[]
+}
+
+
+model Produk {
+  id        String  @id @default(cuid())
+  nama      String  @db.VarChar(50)
+  quantity  Int
+  price     Int
+  jenis     String
+  satuan    Satuan?  @default(PCS)
+  deskripsi String?
+
+  order     Order[]
+}
+
+model Order {
+  id          String    @id @default(cuid())
+  tanggal     DateTime  @default(now())
+  status      Status    @default(PENDING)
+  alamat      String    
+  ongkir      Int
+  userId      String
+  produkId    String
+
+  detailOrder DetailOrder[]
+
+  user        User      @relation(fields: [userId], references: [id])
+  produk      Produk    @relation(fields: [produkId], references: [id])
+
+  @@index([userId, produkId])
+}
+
+
+model DetailOrder {
+  id        String  @id @default(cuid())
+  orderId   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  order     Order   @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+}
+
+
+enum Status {
+  PENDING
+  SUCCESS
+}
+
+
+enum  Satuan {
+  PACK
+  PCS
+  KG
+  LUSIN
+  BALL
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
