@@ -1,12 +1,11 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(
-  { params }: { params: Promise<{ orderId: string }> }
+  request: NextRequest
 ) {
   try {
-    const resolveOrder = await params;
-    const id = String(resolveOrder.orderId)
+    const id = request.nextUrl.pathname.split('/').pop();
 
     const order = await prisma.order.findUnique({
       where: { id: id },
@@ -40,17 +39,15 @@ export async function GET(
 }
 
 export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ orderId: string }>} 
+  request: NextRequest
 ) {
   try {
     const body = await request.json()
     const { status, alamat, ongkir } = body;
-    const resolveOrder = await params;
-    const id = String(resolveOrder.orderId)
+    const id = request.nextUrl.pathname.split('/').pop();
 
     const order = await prisma.order.update({
-      where: { id: id },
+      where: { id },
       data: {
         status,
         alamat,
@@ -82,19 +79,17 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ orderId: string }>}
+  request: NextRequest
 ) {
   try {
-    const resolveOrder = await params;
-    const id = String(resolveOrder.orderId)
+    const id = request.nextUrl.pathname.split('/').pop();
     // Delete detail orders first due to foreign key constraint
     await prisma.detailOrder.deleteMany({
       where: { orderId: id }
     })
 
     await prisma.order.delete({
-      where: { id: id }
+      where: { id }
     })
 
     return NextResponse.json({ message: 'Order deleted successfully' })

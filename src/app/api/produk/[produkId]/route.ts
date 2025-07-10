@@ -1,15 +1,14 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(
-  { params }: { params: Promise<{ produkId: string }> }
+  request: NextRequest
 ) {
   try {
-    const resolveProduk = await params;
-    const id = resolveProduk.produkId;
+    const id  = request.nextUrl.pathname.split('/').pop();
 
     const product = await prisma.produk.findUnique({
-      where: { id: id }
+      where: { id }
     })
 
     if (!product) {
@@ -23,13 +22,10 @@ export async function GET(
 }
 
 export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ produkId: string }> }
+  request: NextRequest
 ) {
   try {
-    const resolveProduk = await params;
-    const id = resolveProduk.produkId;
-
+    const id  = request.nextUrl.pathname.split('/').pop();
     const body = await request.json()
     const { nama, quantity,image, price, jenis, satuan, deskripsi } = body
 
@@ -53,14 +49,13 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  { params }: { params: Promise<{ produkId: string }> }
+  request: NextRequest
 ) {
   try {
-    const resolveProduk = await params;
-    const id = resolveProduk.produkId;
+    const id  = request.nextUrl.pathname.split('/').pop();
 
     await prisma.produk.delete({
-      where: { id: id }
+      where: { id}
     })
 
     return NextResponse.json({ message: 'Product deleted successfully' })
